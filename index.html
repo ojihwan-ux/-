@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>근본 팀: 100문항 정복 프로젝트</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- React 및 Lucide 아이콘 모듈 임포트맵 -->
+  <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+        "lucide-react": "https://esm.sh/lucide-react@0.263.1"
+      }
+    }
+  </script>
+
+  <!-- 브라우저에서 JSX를 변환하기 위한 Babel -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+
+<body class="bg-slate-50 min-h-screen">
+  <div id="root"></div>
+
+  <!-- 실제 웹앱 코드 -->
+  <script type="text/babel" data-type="module">
+    import React, { useState } from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { BookOpen, Mic, CheckCircle, HelpCircle, ArrowRight, Award, MessageCircle, RefreshCw, Star, BarChart3, ChevronRight, ChevronLeft, Target, Info } from 'lucide-react';
+
+    const initialQuizData = [
+      // [1-10] 탐구 동기 및 개요
+      { q: "왕우렁이가 해충으로 변하게 된 근본적인 환경적 요인은 무엇인가요?", a: 1, o: ["수질 오염의 심화", "지구 온난화로 인한 겨울철 월동 가능 지역의 확대", "천적의 멸종", "농약의 과다 사용"], r: "기온 상승으로 인해 남부 지방뿐만 아니라 전국적으로 왕우렁이가 겨울을 버티며 잠복 개체가 되어 피해를 줍니다." },
+      { q: "기존의 '물떼기' 방식이 잠복 개체 방제에 실패하는 이유는 무엇인가요?", a: 2, o: ["물이 너무 차가워서", "우렁이가 물을 싫어해서", "진흙이나 수풀 깊은 곳에 숨어 있는 개체까지 수거하기 어렵기 때문", "벼의 키가 너무 커서"], r: "배수 시 우렁이는 생존 본능에 따라 땅속으로 파고들기 때문에 단순한 물떼기로는 방제가 불가능합니다." },
+      { q: "본 탐구에서 목표로 하는 '능동적 유인'의 정의는 무엇인가요?", a: 1, o: ["사람이 직접 돌아다니며 잡는 것", "자극을 주어 숨어 있는 우렁이가 스스로 트랩으로 기어 나오게 유도하는 것", "강력한 살충제를 뿌리는 것", "우렁이의 천적을 논에 푸는 것"], r: "잠복해 있는 우렁이에게 각성 신호와 먹이 신호를 주어 능동적으로 끌어내는 방식입니다." },
+      { q: "출품 부문인 '산업 및 에너지' 부문의 성격에 가장 부합하는 탐구 내용은?", a: 2, o: ["우렁이의 수영 속도 측정", "우렁이 껍질의 강도 분석", "방제 노동력 절감 및 포획물의 자원 순환 모델 제시", "우렁이의 산란 횟수 관찰"], r: "해충 문제를 기술적으로 해결하고 포획물을 비료로 만드는 산업적 활용 가치를 탐구합니다." },
+      { q: "친환경 복합 유인 트랩의 개발을 위해 결합한 두 가지 주요 자극은?", a: 1, o: ["빛과 소리", "두부 비지 향(후각)과 저주파 진동(평형포 자극)", "온도와 습도", "전기와 화학 약품"], r: "우렁이의 생물학적 감각 특성인 후각과 진동 감지 능력을 결합했습니다." },
+      { q: "탐구 기간(9개월) 중 '기초 탐구 및 실험 설계'를 진행한 주된 시기는?", a: 1, o: ["여름철", "겨울철 및 초봄(1~2월)", "가을철", "연중 내내"], r: "추진 일정표에 따르면 1~2월에 과제 설정 및 정밀 실험 설계가 이루어졌습니다." },
+      { q: "보고서 1쪽 그림 1에서 제시된 뉴스 보도의 날짜는 언제인가요?", a: 1, o: ["2023년 5월", "2024년 7월 18일", "2025년 1월", "2026년 3월"], r: "광주 MBC 뉴스데스크의 2024년 7월 18일 보도를 참고하여 탐구를 시작했습니다." },
+      { q: "탐구의 최종 목적 중 하나인 '자원 순환'의 구체적 방법은?", a: 1, o: ["트랩을 재판매함", "포획한 우렁이를 발효시켜 천연 액체 비료로 제조함", "우렁이를 강에 방류함", "벼의 종자로 활용함"], r: "해충을 영양분으로 되돌려 친환경 농법의 선순환 구조를 완성하는 것입니다." },
+      { q: "보고서 4쪽 특허 검색 결과, 기존 트랩의 가장 큰 문제점은?", a: 1, o: ["가격이 너무 비쌈", "수동적 유인제만 사용하여 잠복 개체를 깨우는 각성 효과가 없음", "크기가 너무 큼", "설치가 불가능함"], r: "기존 기술은 우렁이가 우연히 다가오기만을 기다리는 수동적 방식이었습니다." },
+      { q: "본 탐구가 지향하는 과학적 태도는 무엇인가요?", a: 1, o: ["어려운 용어 사용", "데이터에 근거한 문제 해결과 농민을 돕는 '따뜻한 과학'", "가장 비싼 부품 사용", "빠른 결과 도출"], r: "현장의 불편함을 과학적 원리로 해결하고자 하는 태도를 강조합니다." },
+
+      // [11-20] 선행연구 및 이론적 배경
+      { q: "연체동물이 20~200Hz의 저주파 진동에 민감함을 입증한 연구자는?", a: 1, o: ["Cho et al.", "Solé et al.", "Lee et al.", "Kim et al."], r: "2021년 Solé 등의 연구를 통해 무척추동물의 저주파 감지 능력을 이론적으로 확인했습니다." },
+      { q: "왕우렁이가 귀 대신 진동을 느끼는 데 사용하는 기관의 명칭은?", a: 1, o: ["더듬이", "평형포", "측선", "외투막"], r: "평형포는 우렁이의 평형 감각과 외부 진동을 감지하는 핵심 기관입니다." },
+      { q: "수박 껍질 성분 분석 중 유인 효과에 기여한다고 알려진 아미노산은?", a: 1, o: ["타우린", "시트룰린", "알라닌", "발린"], r: "수박 껍질의 시트룰린 성분이 유인 효과에 관여한다는 선행 연구를 참고했습니다." },
+      { q: "두부 비지가 쌀겨보다 우수한 유인제로 평가받은 과학적 이유는?", a: 1, o: ["더 가벼워서", "고단백 성분이 발효되면서 강력한 아미노산 향을 방출하기 때문", "색깔이 노란색이라서", "가격이 공짜라서"], r: "단백질 분해물이 우렁이의 화학주성을 자극하는 강력한 유인 신호가 됩니다." },
+      { q: "고주파보다 저주파 진동이 흙 속 전달에 유리한 물리적 이유는?", a: 1, o: ["소리가 커서", "파동의 감쇠가 적고 매질을 통해 더 멀리 전달되는 성질 때문", "우렁이가 저주파를 좋아해서", "빛보다 빠르기 때문"], r: "저주파는 장애물(흙)을 통과할 때 에너지를 더 잘 유지하며 멀리 나갑니다." },
+      { q: "왕우렁이의 '화학주성'이란 무엇을 의미하나요?", a: 1, o: ["약품을 피함", "화학 물질의 농도 구배를 따라 이동하는 성질", "빛을 따라감", "소리를 따라감"], r: "비지 향의 농도가 높은 쪽으로 이동하려는 생물학적 성질입니다." },
+      { q: "방제 골든타임으로 설정한 '습윤 상태'의 토양 수분 조건은?", a: 1, o: ["완전히 바짝 마른 흙", "물이 찰랑거리는 상태", "토양이 젖어 있어 우렁이가 활동 가능한 최소한의 수분이 있는 상태", "진흙탕 상태"], r: "우렁이가 생존 본능에 따라 수분을 찾아 이동하려는 의지가 가장 강한 시점입니다." },
+      { q: "보고서에서 아두이노(Arduino)를 사용한 공학적 목적은 무엇인가요?", a: 1, o: ["인터넷 연결", "정밀한 주파수 제어와 간헐적 진동 패턴 구현", "온도 측정", "음악 재생"], r: "우렁이의 경계심을 풀고 각성을 유도하는 특정 진동 시퀀스를 제어하기 위함입니다." },
+      { q: "왕우렁이의 호흡 특성 중 생존력을 높여주는 요인은?", a: 1, o: ["아가미만 있음", "폐와 아가미를 모두 사용하여 수중과 육상에서 모두 생존 가능함", "피부로만 숨을 쉼", "숨을 참을 수 있음"], r: "이중 호흡 구조 덕분에 물이 없는 환경에서도 장기간 잠복하며 버틸 수 있습니다." },
+      { q: "비지 발효 시 발생하는 '글루탐산'의 역할은?", a: 1, o: ["우렁이를 마비시킴", "강력한 섭식 자극제로 작용함", "비지를 딱딱하게 함", "우렁이 껍질을 녹임"], r: "우렁이가 본능적으로 선호하는 성분으로 트랩 안으로 끌어들이는 역할을 합니다." },
+
+      // [21-30] 탐구 과제 1 - 유인 재료 분석 (1)
+      { q: "재료별 탁도 실험(Lux)에서 쌀겨가 부적합 판정을 받은 수치는?", a: 1, o: ["850 lux", "150 lux로 매우 낮아 수질 오염과 유실이 심함", "1000 lux", "0 lux"], r: "쌀겨는 물에 닿자마자 풀어져 빛 투과량을 급격히 떨어뜨리고 금방 소실되었습니다." },
+      { q: "비지의 수중 유실률 실험 결과, 24시간 후 유실률은 약 몇 %였나요?", a: 0, o: ["7%", "30%", "60%", "90%"], r: "비지는 섬유질 결합력 덕분에 7% 내외의 낮은 유실률을 보이며 높은 지속성을 입증했습니다." },
+      { q: "비지의 단백질 함량 데이터값(100g당)은 수박 껍질과 비교해 어떠한가요?", a: 1, o: ["0.6g으로 동일함", "3.5~4.0g으로 수박(0.6g)보다 약 6배 높음", "13g으로 더 높음", "0.1g으로 더 낮음"], r: "단백질 함량이 유인 향의 원천이므로 비지가 수박보다 훨씬 유리합니다." },
+      { q: "탁도 실험에서 사용한 'Lux Meter' 앱의 용도는 무엇인가요?", a: 1, o: ["소리 측정", "빛의 투과량을 측정하여 재료의 수중 풀림 정도를 분석함", "위치 측정", "수온 측정"], r: "입자가 물에 많이 풀릴수록 빛을 차단하여 Lux 값이 낮게 측정되는 원리를 활용했습니다." },
+      { q: "비지 펠렛 제작 시 비지와 전분의 혼합 비율은?", a: 2, o: ["1:9", "5:5", "7:3", "9:1"], r: "7:3 비율이 점도와 형태 유지력 면에서 가장 우수한 데이터를 보였습니다." },
+      { q: "비지 펠렛을 24시간 동안 그늘에서 건조시킨 이유는?", a: 1, o: ["색깔을 내기 위해", "수중에서 쉽게 붕괴되지 않는 물리적 강도를 확보하기 위해", "무게를 줄이기 위해", "냄새를 없애기 위해"], r: "건조 과정을 통해 실제 논 환경에서 장시간 지속될 수 있는 내구성을 얻었습니다." },
+      { q: "탐구 과제 1의 결론에서 '경제성'을 강조한 이유는 무엇인가요?", a: 1, o: ["비지가 비싸기 때문", "비지는 버려지는 폐자원으로 거의 무료로 구할 수 있기 때문", "트랩이 비싸기 때문", "보조금을 받기 위해"], r: "농가의 부담을 줄이기 위해 주변의 부산물을 활용하는 것이 핵심입니다." },
+      { q: "재료 탐색 단계에서 쌀겨의 단백질 함량 수치는?", a: 2, o: ["0.6g", "3.5g", "13.3g", "50g"], r: "쌀겨는 단백질이 매우 높지만(13.3g), 수중 유실률이 너무 커서 탈락했습니다." },
+      { q: "발효 전 생비지의 조도 측정값은 약 얼마였나요?", a: 2, o: ["150 lux", "500 lux", "850 lux", "980 lux"], r: "비지 자체는 초기 조도가 850 lux 내외로 측정되었습니다." },
+      { q: "비지의 '섬유질' 성분이 트랩 제작에 주는 이점은?", a: 1, o: ["우렁이가 잘 먹음", "물속에서 덩어리 형태를 유지하는 결착제 역할을 함", "색깔이 밝아짐", "냄새가 강해짐"], r: "비지는 섬유질이 풍부하여 전분과 섞었을 때 단단한 펠렛 형태를 유지합니다." },
+
+      // [31-40] 탐구 과제 1 - 발효 실험 (2)
+      { q: "비지 발효 실험 시 가장 우수한 유인력을 보인 발효 시간은?", a: 2, o: ["0시간(생비지)", "24시간", "48시간", "1주일"], r: "48시간 발효 시 단백질 분해가 최적화되어 가장 빠른 유인 시간을 기록했습니다." },
+      { q: "48시간 발효 비지의 색깔 변화는 어떠했나요?", a: 2, o: ["흰색 유지", "검은색으로 변함", "연한 갈색 내지 황토색으로 변함", "파란색이 됨"], r: "발효가 진행됨에 따라 단백질 부패/발효 과정에서 색이 짙어집니다." },
+      { q: "군집 실험(20마리)에서 48시간 발효 비지를 선택한 개체 수는?", a: 2, o: ["5마리", "10마리", "16마리", "20마리"], r: "80%에 해당하는 16마리가 압도적으로 48시간 발효군을 선택했습니다." },
+      { q: "독립 실험에서 48시간 발효 비지까지 도달하는 평균 시간은?", a: 2, o: ["12분 40초", "7분 15초", "4분 20초", "1분"], r: "생비지보다 3배 가까운 빠른 유인 속도를 보였습니다." },
+      { q: "왜 72시간 이상 발효시키는 것이 오히려 좋지 않았나요?", a: 1, o: ["냄새가 너무 좋아서", "재현성이 떨어지고 암모니아성 악취가 너무 강해져 역효과가 우려됨", "색깔이 너무 예뻐서", "가격이 비싸져서"], r: "지나친 부패는 우렁이에게 거부감을 줄 수 있음을 확인했습니다." },
+      { q: "발효 거리 실험에서 유인 성공률 100%를 기록한 반경은?", a: 1, o: ["10cm", "40cm", "70cm", "1m"], r: "40cm 지점까지는 모든 개체가 5분 이내에 반응하여 방향을 잡았습니다." },
+      { q: "발효 비지 향의 실질적인 유효 한계 거리는 몇 cm인가요?", a: 1, o: ["30cm", "80cm", "150cm", "5m"], r: "80cm 지점부터 반응 속도가 급격히 느려져 한계 반경으로 산출했습니다." },
+      { q: "발효 실험 시 보온 박스의 온도를 25~30도로 유지한 이유는?", a: 1, o: ["우렁이를 따뜻하게 하려고", "미생물의 발효 활동을 가장 활발하게 하기 위해", "냄새를 없애려고", "벼를 잘 자라게 하려고"], r: "발효 효율을 극대화하여 유인 성분(아미노산)을 많이 얻기 위함입니다." },
+      { q: "비지 펠렛 제작 과정 중 '치대기' 과정의 중요성은?", a: 1, o: ["맛있게 하려고", "공기를 제거하고 점도를 높여 수중 안정성을 강화하기 위해", "무게를 늘리려고", "색을 입히려고"], r: "공정의 디테일이 펠렛의 지속 시간에 큰 영향을 줍니다." },
+      { q: "발효 비지에서 나는 '꼬릿한 냄새'의 정체는 무엇인가요?", a: 1, o: ["향기 성분", "단백질이 분해되어 생성된 암모니아 및 아미노산 성분", "전분의 향", "우렁이의 체취"], r: "우렁이의 화학 수용체를 자극하는 실질적인 유인 신호입니다." },
+
+      // [41-50] 탐구 과제 2 - 진동 주파수 분석 (1)
+      { q: "잠복 개체를 깨우는 각성 실험에서 100Hz 진동의 평균 반응 시간은?", a: 1, o: ["3초", "8초", "20초", "60초"], r: "100Hz 저주파 자극 시 약 8초 내외로 가장 즉각적인 각성 반응을 보였습니다." },
+      { q: "500Hz 고주파 자극 시 우렁이의 주된 행동은 어떠했나요?", a: 1, o: ["춤을 춤", "껍질을 더 꽉 닫거나 움직임이 거의 없음", "즉시 기어 나옴", "알을 낳음"], r: "고주파는 자연계에서 위협으로 인지되어 잠복을 강화시키는 결과를 낳았습니다." },
+      { q: "아두이노 진동 장치만 단독으로 사용했을 때의 유효 전달 반경은?", a: 1, o: ["10cm", "30cm", "80cm", "5m"], r: "기본 모터만으로는 30cm 지점까지만 진동이 유효하게 전달되었습니다." },
+      { q: "100Hz 진동 시 20마리 중 30초 내에 움직이기 시작한 개체 수는?", a: 2, o: ["0마리", "5마리", "10마리", "20마리"], r: "절반에 달하는 10마리가 즉각적인 반응을 보여 최적 주파수로 선정되었습니다." },
+      { q: "주파수 실험 전 우렁이를 잠복 상태로 유도하기 위해 사용한 수온은?", a: 1, o: ["0도", "약 13도(정수기 물)", "25도", "40도"], r: "낮은 온도로 일정한 휴면 상태를 만든 뒤 실험을 시작했습니다." },
+      { q: "왜 진동 실험의 관찰 시간을 30분으로 표준화했나요?", a: 1, o: ["배터리가 30분만 가서", "30분 이후에는 새로운 반응이 나타나지 않음을 확인했기 때문", "수업 시간", "우렁이가 배고파해서"], r: "데이터의 수렴 지점이 30분 내외임을 실험으로 규명했습니다." },
+      { q: "흙 속 전달 실험에서 50cm 이상의 거리에서 나타난 반응은?", a: 1, o: ["매우 빠르게 옴", "반응 없음(30분 동안 움직임 없음)", "서서히 움직임", "트랩 밖으로 나감"], r: "진동 에너지가 감쇠되어 50cm 지점부터는 각성 효과가 사라졌습니다." },
+      { q: "진동 자극 시 우렁이가 더듬이를 움츠리는 현상의 의미는?", a: 1, o: ["졸려서", "외부 환경의 변화나 진동을 감지했다는 신호", "기분이 좋아서", "배가 불러서"], r: "평형포를 통한 감각 수용이 즉각적으로 일어나고 있음을 보여주는 지표입니다." },
+      { q: "보고서에서 100Hz를 '기적의 주파수' 혹은 '각성 주파수'라 부르는 이유는?", a: 1, o: ["예쁜 소리가 나서", "잠든 우렁이를 능동적으로 깨우는 데 가장 효과적이기 때문", "전기가 적게 들어서", "모터 수명이 늘어서"], r: "잠복 개체를 깨우는 물리적 트리거 역할을 완벽히 수행하기 때문입니다." },
+      { q: "아두이노 진동 장치를 매립할 때 흙의 두께는?", a: 1, o: ["1cm", "3cm", "10cm", "매립 안 함"], r: "실제 논 환경을 모사하기 위해 3cm 두께의 습윤 토양 아래 매립했습니다." },
+
+      // [51-60] 탐구 과제 2 - 진동 증폭 기술 (2)
+      { q: "진동 도달 거리의 한계를 극복하기 위해 트랩에 추가한 공학적 장치는?", a: 1, o: ["더 큰 배터리", "용수철 지지대(스프링)", "유리막", "모터 2개"], r: "탄성을 이용해 파동을 증폭시켜 흙 속 전달 효율을 높였습니다." },
+      { q: "용수철을 장착한 후 진동의 유효 전달 거리는 어떻게 변했나요?", a: 1, o: ["변화 없음", "30cm에서 50cm로 약 1.6배 확대", "10cm로 감소", "5m로 확대"], r: "용수철의 증폭 효과로 트랩 1개당 방제 면적을 넓힐 수 있게 되었습니다." },
+      { q: "용수철 지지대를 3D 프린터로 제작한 지지 가이드에 끼운 이유는?", a: 1, o: ["장식용", "진동의 방향성을 수직/수평으로 제어하여 효율을 높이기 위해", "가벼워서", "부서지지 않게"], r: "무분별한 진동 대신 매질을 타고 잘 흐르는 파동을 만들기 위함입니다." },
+      { q: "왜 10cm 근거리 개체들은 진동 시 오히려 껍질을 닫았나요? (에피소드 2)", a: 1, o: ["진동이 약해서", "강한 진동을 천적의 공격으로 오해했기 때문", "잠이 덜 깨서", "비지가 맛없어서"], r: "자극이 과하면 위협이 된다는 '데이터의 역설'을 발견한 지점입니다." },
+      { q: "근거리 개체의 경계 반응을 해결하기 위해 코딩한 진동 패턴은?", a: 1, o: ["계속 울림", "15분 작동 후 5분 휴식(간헐적 진동)", "1분 작동 후 1시간 휴식", "낮에만 작동"], r: "휴식 시간을 통해 우렁이가 안심하고 다가올 수 있는 환경을 조성했습니다." },
+      { q: "용수철 증폭 실험에서 70cm 거리의 결과는 무엇이었나요?", a: 1, o: ["성공", "반응 없음(전원 잠복 유지)", "절반 성공", "즉시 각성"], r: "증폭을 해도 70cm는 에너지가 전달되지 않는 물리적 한계 거리임을 확인했습니다." },
+      { q: "진동원(0cm)에서 거리가 멀어질수록 반응 시간이 어떻게 변했나요?", a: 1, o: ["일정함", "거리에 비례하여 반응 시간이 길어짐", "더 빨라짐", "상관관계 없음"], r: "에너지 감쇠에 따라 우렁이가 자극을 인지하는 데 더 많은 시간이 소요됩니다." },
+      { q: "아두이노 진동 장치의 전력원으로 선택한 부품은?", a: 1, o: ["대형 발전기", "9V 배터리 및 태양광 패널 연동 계획", "가정용 콘센트", "자가 발전"], r: "휴대성과 지속 가능성을 고려하여 배터리와 태양광 조합을 택했습니다." },
+      { q: "트랩 상단의 '아크릴판'의 공학적 역할은?", a: 1, o: ["우렁이가 밟는 판", "진동 모터의 파동을 용수철로 전달하는 매개체", "뚜껑", "반사판"], r: "모터의 미세한 떨림을 증폭 기구로 전달하는 지지 기반입니다." },
+      { q: "진동 주파수 측정 시 스마트폰 앱 'Sonic'을 활용한 이유는?", a: 1, o: ["무료라서", "정밀한 Hz 단위의 사인파 주파수 생성이 가능하기 때문", "사용이 쉬워서", "그냥 유명해서"], r: "실험의 변인 통제를 위해 정확한 주파수 자원이 필요했기 때문입니다." },
+
+      // [61-70] 탐구 과제 3 - 시너지 효과 분석 (1)
+      { q: "단일 냄새 자극만 주었을 때(A수조)의 포획률 데이터값은?", a: 0, o: ["15%", "50%", "80%", "100%"], r: "잠복 상태인 우렁이는 냄새를 감지하지 못해 3마리(15%)만 포획되었습니다." },
+      { q: "단일 진동 자극만 주었을 때(B수조)의 포획률 데이터값은?", a: 1, o: ["15%", "25%", "80%", "100%"], r: "잠은 깨웠으나 방향성이 없어 5마리(25%)만 우연히 트랩 근처로 왔습니다." },
+      { q: "냄새와 진동을 결합한 복합 자극(C수조)의 포획률 데이터값은?", a: 2, o: ["30%", "50%", "80%", "100%"], r: "두 자극의 결합으로 16마리(80%)가 트랩 안으로 들어오는 혁신적 결과를 보였습니다." },
+      { q: "복합 자극이 단일 냄새 자극보다 몇 배 더 효율적이었나요?", a: 1, o: ["2배", "약 5.3배", "10배", "효과 없음"], r: "15%에서 80%로의 상승은 통계적으로 매우 유의미한 시너지 효과입니다." },
+      { q: "보고서에서 '진동'을 무엇에 비유했나요?", a: 1, o: ["이정표", "자명종(알람)", "밥그릇", "선생님"], r: "잠자는 우렁이를 깨우는 첫 번째 신호이기 때문입니다." },
+      { q: "보고서에서 '비지 향'을 무엇에 비유했나요?", a: 0, o: ["이정표", "자명종", "배터리", "등대"], r: "깨어난 우렁이가 트랩으로 찾아올 수 있게 방향을 알려주는 가이드 역할을 하기 때문입니다." },
+      { q: "복합 자극 수조에서 우렁이가 보인 전형적인 행동 패턴은?", a: 1, o: ["사방으로 흩어짐", "일제히 흙에서 나와 트랩 쪽으로 방향을 잡고 기어옴", "다시 잠듦", "서로 싸움"], r: "명확한 각성과 방향 제시가 이루어졌을 때의 특징적인 모습입니다." },
+      { q: "탐구 3을 통해 도출한 트랩 간 권장 설치 거리는?", a: 2, o: ["10cm", "30cm", "80cm~1m", "5m"], r: "증폭된 유효 반경 50cm를 고려하여 80cm~1m 간격 설치를 제안했습니다." },
+      { q: "시너지 실험 시 '반응 없음'으로 간주된 시간 기준은?", a: 2, o: ["5분", "15분", "30분", "1시간"], r: "실험의 일관성을 위해 30분 동안 움직임이 없는 경우를 실패로 보았습니다." },
+      { q: "왜 실험 3에서 사용한 우렁이는 수조당 20마리였나요?", a: 1, o: ["수조가 작아서", "통계적 유의성을 확보할 수 있는 최소 표본 크기를 고려했기 때문", "그냥 20마리뿐이라서", "선생님이 시켜서"], r: "실험 결과의 신뢰도를 위해 충분한 개체 수를 활용했습니다." },
+
+      // [71-80] 탐구 과제 3 - 시너지 효과 분석 (2)
+      { q: "복합 자극 실험 결과 알게 된 '완벽한 상호 보완'의 의미는?", a: 1, o: ["둘 다 똑같다", "진동은 깨우고 냄새는 유도하여 포획률을 극대화한다는 의미", "서로 방해한다", "아무 관련 없다"], r: "각 자극의 단점(못 깨움/방향 모름)을 서로가 완벽히 메워줌을 의미합니다." },
+      { q: "왜 냄새 자극은 원거리에서보다 근거리에서 더 효과적이었나요?", a: 1, o: ["우렁이가 가까운 것만 봐서", "확산 작용에 의해 트랩 근처의 향기 농도가 가장 높기 때문", "비지가 작아서", "진동이 도와줘서"], r: "화학 물질의 확산 원리상 근거리에서 주성 신호가 가장 강력합니다." },
+      { q: "복합 자극 실험 중 나타난 '군집 이동' 습성이란?", a: 1, o: ["각자 도생", "먼저 이동한 개체의 점액질을 따라 무리가 함께 트랩으로 향하는 현상", "둥글게 모임", "일렬종대"], r: "우렁이의 생태적 습성이 유인 효율을 더 높여주는 긍정적 요인이 되었습니다." },
+      { q: "진동 증폭 장치가 없을 때와 있을 때의 유효 방제 면적 차이는 약 몇 배인가요?", a: 2, o: ["동일함", "2배", "약 2.8배(반경 30cm vs 50cm 산출 시)", "10배"], r: "반경이 늘어나면 방제 가능 면적은 제곱에 비례하여 크게 증가합니다." },
+      { q: "시너지 실험 시 수조의 토양을 매번 새로 정비한 이유는?", a: 1, o: ["깨끗하게 보이려고", "이전 실험의 점액질이나 냄새 성분이 다음 실험에 영향을 주지 않게 하려고", "시간이 많아서", "흙이 예뻐서"], r: "실험의 변인 통제와 재현성을 확보하기 위한 정밀한 노력입니다." },
+      { q: "왜 '진동' 자극은 30분 이후에는 유인 효과가 떨어졌나요?", a: 1, o: ["우렁이가 귀찮아서", "이미 각성할 개체는 다 깼고, 남은 진동은 경계심을 줄 수 있기 때문", "배터리 방전", "모터 고장"], r: "진동은 각성용 트리거이므로 일정 시간 후에는 냄새 자극이 주도해야 합니다." },
+      { q: "복합 자극 트랩의 핵심 코딩 알고리즘의 명칭은?", a: 1, o: ["무한 루프", "하이브리드 간헐적 유인 시퀀스", "랜덤 진동", "단발성 작동"], r: "생물 반응 데이터에 최적화된 작동 순서를 의미합니다." },
+      { q: "실험 3에서 입증된 '능동적'이라는 수식어의 근거는?", a: 1, o: ["트랩이 움직여서", "잠든 우렁이를 '강제로' 깨워 이동하게 만들었기 때문", "사람이 능동적이라서", "우렁이가 능동적이라서"], r: "수동적 기다림이 아닌 자극을 통한 적극적 유인을 뜻합니다." },
+      { q: "시너지 실험에서 70cm 거리의 포획률이 0%였던 원인은?", a: 1, o: ["우렁이가 졸려서", "진동과 냄새 신호가 도달하지 못하는 물리적 한계를 넘었기 때문", "수조 벽이 높아서", "밤이라서"], r: "장치의 도달 범위 밖에서는 유인이 불가능함을 데이터로 보여줍니다." },
+      { q: "복합 자극의 성공이 농가 보급에 주는 시사점은?", a: 1, o: ["의미 없음", "적은 수의 트랩으로도 광범위한 잠복 개체 방제가 가능하다는 경제성 확인", "비용 상승", "기술적 어려움"], r: "실용화 단계에서 가장 중요한 효율성을 입증한 결과입니다." },
+
+      // [81-90] 탐구 과제 4 - 트랩 제작 및 성능 검증 (1)
+      { q: "트랩 본체 제작 시 사용한 업사이클링 재료의 명칭은?", a: 1, o: ["페트병", "폐 배달용기(이중 플라스틱 용기)", "유리병", "나무 상자"], r: "환경 보호와 제작 단가를 동시에 낮추기 위해 주변의 폐기물을 활용했습니다." },
+      { q: "트랩 하단의 '천공' 작업의 목적은 무엇인가요?", a: 1, o: ["디자인", "비지 향의 수평 확산을 돕고 우렁이가 진입하기 쉽게 하기 위해", "물 빼기", "가볍게 함"], r: "방향성 있는 유인을 위해 최적의 위치에 구멍을 뚫었습니다." },
+        { q: "최종 제작된 '친환경 복합 유인 트랩' 1개의 원가는?", a: 1, o: ["10만원 이상", "폐자원 활용으로 5,000원 이하의 저비용 실현 가능", "무료", "100만원"], r: "업사이클링을 통해 누구나 부담 없이 쓸 수 있는 보급형 장치를 지향합니다." },
+    { q: "왜 본 탐구가 제72회 전라남도과학전람회에서 산업적 가치가 높은가요?", a: 1, o: ["보고서가 두꺼워서", "지역 농가의 현실 문제를 규명된 데이터와 독창적 기술로 해결했기 때문", "사진이 많아서", "학생들이 잘생겨서"], r: "실질적인 문제 해결 능력과 실용화 가능성이 매우 높기 때문입니다." },
+    { q: "보고서 30쪽 '알게 된 점'에서 우렁이와 '대화'했다는 표현의 의미는?", a: 1, o: ["우렁이가 말을 함", "과학적 자극과 반응 데이터를 통해 생물의 생리적 신호를 이해했다는 뜻", "우렁이를 칭찬함", "마음으로 소통함"], r: "관찰과 실험을 통해 생명 현상의 법칙을 찾아낸 기쁨을 표현한 것입니다." },
+    { q: "마지막 문장에서 제안한 이 탐구의 최종 지향점은?", a: 1, o: ["상장 받기", "친환경 농업의 지속 가능한 미래를 여는 '근본' 있는 기술의 완성", "대학 가기", "우렁이 수출"], r: "기술의 사회적 기여와 미래 농업에 대한 비전을 제시하며 마무리합니다." }
+      ];
+
+    // 문제 배열 셔플 함수 (새로 접속하거나 다시 풀 때 호출됨)
+    const shuffleArray = (array) => {
+      return [...array].sort(() => Math.random() - 0.5);
+    };
+
+    const App = () => {
+      const [activeTab, setActiveTab] = useState('quiz');
+      const [currentQuestion, setCurrentQuestion] = useState(0);
+      const [showAnswer, setShowAnswer] = useState(false);
+      const [score, setScore] = useState(0);
+      const [quizFinished, setQuizFinished] = useState(false);
+
+      // 초기 접속 시 문제들을 무작위로 섞어서 세팅합니다.
+      const [quizData, setQuizData] = useState(() => shuffleArray(initialQuizData));
+
+      const handleNext = () => {
+        setShowAnswer(false);
+        if (currentQuestion < quizData.length - 1) {
+          setCurrentQuestion(currentQuestion + 1);
+        } else {
+          setQuizFinished(true);
+        }
+      };
+
+      const handlePrev = () => {
+        setShowAnswer(false);
+        if (currentQuestion > 0) {
+          setCurrentQuestion(currentQuestion - 1);
+        }
+      };
+
+      const handleOptionClick = (idx) => {
+        if (showAnswer) return;
+        if (idx === quizData[currentQuestion].a) setScore(score + 1);
+        setShowAnswer(true);
+      };
+
+      const resetQuiz = () => {
+        setCurrentQuestion(0);
+        setScore(0);
+        setShowAnswer(false);
+        setQuizFinished(false);
+        // 다시 풀기를 누를 때마다 문제 순서를 새롭게 섞어줍니다.
+        setQuizData(shuffleArray(initialQuizData));
+      };
+
+      return (
+        <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-800">
+          <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
+
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-900 to-indigo-900 p-8 text-white text-center">
+              <div className="flex justify-center mb-4 text-yellow-400"><Award size={56} /></div>
+              <h1 className="text-3xl md:text-5xl font-black mb-3 tracking-tighter italic">근본 팀: 100문항 정복 프로젝트</h1>
+              <p className="text-blue-100 font-bold text-lg md:text-xl">보고서 36페이지 완전 분석 및 면담심사 필승 트레이닝</p>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex bg-slate-100 border-b border-slate-200">
+              <button
+                onClick={() => setActiveTab('quiz')}
+                className={`flex-1 py-6 flex justify-center items-center gap-3 font-black text-xl transition-all ${activeTab === 'quiz' ? 'bg-white text-indigo-700 border-t-4 border-t-indigo-700 shadow-sm' : 'text-slate-500 hover:bg-slate-200'}`}
+              >
+                <BarChart3 size={28} /> 시트 1: 100문항 정밀 퀴즈
+              </button>
+              <button
+                onClick={() => setActiveTab('script')}
+                className={`flex-1 py-6 flex justify-center items-center gap-3 font-black text-xl transition-all ${activeTab === 'script' ? 'bg-white text-indigo-700 border-t-4 border-t-indigo-700 shadow-sm' : 'text-slate-500 hover:bg-slate-200'}`}
+              >
+                <Mic size={28} /> 시트 2: 3분 발표 시나리오
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 md:p-12">
+              {activeTab === 'quiz' ? (
+                <div className="quiz-container">
+                  {!quizFinished ? (
+                    <div className="space-y-8 animate-in fade-in duration-500">
+                      <div className="flex justify-between items-center bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                        <div className="flex items-center gap-2">
+                          <Target className="text-indigo-600 w-6 h-6" />
+                          <span className="text-indigo-800 font-extrabold text-lg md:text-xl">Question {currentQuestion + 1} <span className="text-indigo-400 text-sm md:text-base">/ 100</span></span>
+                        </div>
+                        <div className="flex gap-2">
+                          <button onClick={handlePrev} className="p-2 bg-white border border-indigo-200 hover:bg-indigo-100 rounded-lg text-indigo-700 transition-all active:scale-95"><ChevronLeft size={24} /></button>
+                          <button onClick={handleNext} className="p-2 bg-white border border-indigo-200 hover:bg-indigo-100 rounded-lg text-indigo-700 transition-all active:scale-95"><ChevronRight size={24} /></button>
+                        </div>
+                      </div>
+
+                      <div className="bg-white p-6 md:p-8 rounded-2xl border-2 border-slate-100 shadow-sm relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1.5 h-full bg-indigo-600"></div>
+                        <h2 className="text-lg md:text-2xl font-extrabold text-slate-800 leading-snug pl-1">
+                          {quizData[currentQuestion].q}
+                        </h2>
+                      </div>
+
+                      <div className="flex flex-col gap-3">
+                        {quizData[currentQuestion].o.map((option, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => handleOptionClick(idx)}
+                            disabled={showAnswer}
+                            className={`w-full p-4 md:p-5 text-left rounded-xl border-2 transition-all flex items-center gap-4 text-base md:text-lg font-bold shadow-sm ${showAnswer
+                                ? idx === quizData[currentQuestion].a
+                                  ? 'border-green-500 bg-green-50 text-green-700'
+                                  : 'border-slate-100 bg-slate-50 text-slate-400 opacity-70'
+                                : 'border-slate-100 bg-white hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-md transform hover:-translate-y-[2px]'
+                              }`}
+                          >
+                            <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-base border-2 shrink-0 ${showAnswer && idx === quizData[currentQuestion].a ? 'bg-green-500 text-white border-green-500' : 'border-slate-200 text-slate-500 bg-slate-50'}`}>
+                              {String.fromCharCode(65 + idx)}
+                            </div>
+                            <span className="leading-snug">{option}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      {showAnswer && (
+                        <div className="mt-6 p-6 md:p-8 bg-indigo-50 rounded-2xl border-2 border-indigo-100 shadow-inner animate-in slide-in-from-bottom-6 duration-300">
+                          <div className="flex items-center gap-2 text-indigo-900 font-extrabold mb-3 text-lg md:text-xl border-b border-indigo-200 pb-3">
+                            <Info size={24} className="text-indigo-600" /> 팩트 체크 및 면담 대응 논리
+                          </div>
+                          <p className="text-slate-800 leading-relaxed text-base md:text-lg font-bold">
+                            "{quizData[currentQuestion].r}"
+                          </p>
+                          <button
+                            onClick={handleNext}
+                            className="mt-6 w-full bg-indigo-600 text-white py-4 md:py-5 rounded-xl font-extrabold text-lg md:text-xl hover:bg-indigo-700 flex justify-center items-center gap-3 shadow-lg transition-all active:scale-95"
+                          >
+                            {currentQuestion === 99 ? '최종 결과 리포트' : '다음 문제 정복'} <ArrowRight size={24} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-20 space-y-12 animate-in zoom-in duration-500">
+                      <div className="inline-block p-12 bg-yellow-100 rounded-full text-yellow-600 shadow-2xl animate-bounce"><Award size={100} /></div>
+                      <h2 className="text-6xl font-black text-slate-900">100문항 퍼펙트 정복!</h2>
+                      <div className="bg-indigo-50 p-12 rounded-3xl border-8 border-indigo-100 max-w-md mx-auto shadow-2xl transform rotate-1">
+                        <p className="text-9xl font-black text-indigo-700 mb-5">{score}</p>
+                        <p className="text-3xl text-slate-600 font-black uppercase tracking-widest underline decoration-indigo-400">Total Score</p>
+                      </div>
+                      <p className="text-3xl text-slate-600 font-bold leading-relaxed px-10">
+                        이제 보고서 36페이지의 모든 팩트가 당신의 머릿속에 있습니다.<br />심사위원의 날카로운 질문에 데이터로 당당하게 답변하세요!
+                      </p>
+                      <div className="flex gap-5 justify-center">
+                        <button onClick={resetQuiz} className="bg-slate-800 text-white px-10 py-6 rounded-2xl font-black text-2xl hover:bg-slate-900 shadow-xl transition-all flex items-center gap-3">
+                          <RefreshCw size={28} /> 다시 풀기
+                        </button>
+                        <button onClick={() => setActiveTab('script')} className="bg-indigo-700 text-white px-10 py-6 rounded-2xl font-black text-2xl hover:bg-indigo-800 shadow-xl transition-all flex items-center gap-3">
+                          <Mic size={28} /> 발표 연습하러 가기
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="script-container space-y-16 animate-in fade-in duration-500">
+                  <div className="bg-blue-50 p-10 rounded-3xl border-4 border-blue-200 flex items-start gap-8 shadow-sm">
+                    <div className="text-blue-700 mt-2"><MessageCircle size={48} /></div>
+                    <div>
+                      <p className="font-black text-blue-950 text-3xl mb-4">3분 발표 전략 가이드</p>
+                      <p className="text-blue-900 text-2xl leading-relaxed font-bold">
+                        3분은 매우 짧습니다. 시나리오의 <span className="font-black text-indigo-900 underline decoration-indigo-400 underline-offset-8 italic">굵은 부분</span>은 강하게 강조하시고, <span className="font-black text-emerald-700 underline decoration-emerald-300">데이터 수치</span>를 언급할 때는 차트의 해당 수치를 정확하게 손으로 짚어주세요!
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-24">
+                    {/* Intro - Park In-woo */}
+                    <section className="relative pl-16 border-l-8 border-indigo-400">
+                      <div className="absolute -left-8 top-0 bg-indigo-700 text-white text-xl px-8 py-3 rounded-full font-black shadow-xl">학생 B (박인우) - 도입 및 동기 (0:00~1:00)</div>
+                      <div className="text-3xl leading-relaxed text-slate-800 bg-white p-12 rounded-3xl shadow-md border-2 border-slate-100 mt-12">
+                        "안녕하십니까! 기후 변화로 인해 농업 해충으로 돌변한 왕우렁이 문제를 해결하고자 뭉친 <span className="font-black text-slate-950 italic">‘근본’ 팀</span>입니다!
+                        저희는 물을 빼도 <span className="font-black text-slate-950 underline decoration-indigo-400 underline-offset-8">진흙 속에 깊이 숨은 ‘잠복 개체’</span>들이 살아남아 이듬해 어린 벼에 막대한 피해를 주는 현실에 주목했습니다.
+                        기존 수거 방식의 한계를 극복하기 위해, 저희는 우렁이를 <span className="font-black text-indigo-800 underline decoration-indigo-300 underline-offset-8 font-black">스스로 나오게 만드는 ‘능동적 방제’</span>를 탐구했습니다.
+                        버려지는 <span className="font-black text-slate-950 underline decoration-indigo-300 underline-offset-8">두부 비지</span>와 왕우렁이가 민감한 <span className="font-black text-slate-950 underline decoration-indigo-300 underline-offset-8">저주파 진동</span>을 결합하여,
+                        포획과 자원 순환을 동시에 실현하는 <span className="font-black text-indigo-900">친환경 복합 유인 트랩</span>을 최초로 개발하게 되었습니다!"
+                      </div>
+                    </section>
+
+                    {/* Data/Principles - Park Ki-bong */}
+                    <section className="relative pl-16 border-l-8 border-emerald-400">
+                      <div className="absolute -left-8 top-0 bg-emerald-700 text-white text-xl px-8 py-3 rounded-full font-black shadow-xl">학생 A (박기봉) - 핵심 데이터 분석 (1:00~2:00)</div>
+                      <div className="text-3xl leading-relaxed text-slate-800 bg-white p-12 rounded-3xl shadow-md border-2 border-slate-100 mt-12">
+                        "저희 탐구의 핵심 성과를 수치로 입증하겠습니다!
+                        첫째, 유인제 비교 결과 <span className="font-black text-emerald-900 underline decoration-emerald-400 underline-offset-8">두부 비지는 수중 유실률이 약 7%</span>에 불과해 압도적 지속성을 보였습니다.
+                        둘째, 각성 실험 결과 <span className="font-black text-emerald-900 underline decoration-emerald-400 underline-offset-8 font-black">100Hz 저주파</span>가 최적의 각성 주파수임을 규명했으며, <span className="font-black text-slate-950 underline decoration-emerald-400 underline-offset-8 italic">평균 8초 이내</span>에 반응하는 결과를 얻었습니다.
+                        셋째, 진동과 냄새를 결합한 복합 자극 시 단일 자극 대비 <span className="font-black text-emerald-900 underline decoration-emerald-400 underline-offset-8">5배 이상 높은 80%의 포획률</span>을 기록했습니다.
+                        마지막으로 용수철 장치를 통해 진동 유효 거리를 <span className="font-black text-emerald-900 underline decoration-emerald-400 underline-offset-8">30cm에서 50cm로 확대</span>하여 실전 방제 효율을 극대화했습니다!"
+                      </div>
+                    </section>
+
+                    {/* Tech/Conclusion - Lee Jun-seo */}
+                    <section className="relative pl-16 border-l-8 border-orange-400">
+                      <div className="absolute -left-8 top-0 bg-orange-600 text-white text-xl px-8 py-3 rounded-full font-black shadow-xl">학생 C (이준서) - 기술 적용 및 결론 (2:00~3:00)</div>
+                      <div className="text-3xl leading-relaxed text-slate-800 bg-white p-12 rounded-3xl shadow-md border-2 border-slate-100 mt-12">
+                        "저희는 이 데이터를 바탕으로 폐 배달용기를 재활용한 <span className="font-black text-slate-950 italic underline decoration-orange-300 underline-offset-8">친환경 복합 유인 트랩</span>을 완성했습니다!
+                        특히 근거리 경계 반응을 방지하기 위해 아두이노 코딩으로 <span className="font-black text-orange-950 underline decoration-orange-300 underline-offset-8 font-black">‘15분 작동-5분 휴식’</span>의 간헐적 패턴을 적용한 것이 저희의 핵심 기술입니다.
+                        그 결과 기존 수박 방식보다 <span className="font-black text-orange-900 underline decoration-orange-300 underline-offset-8 font-black">약 6.4배 우수한 83.3%의 실전 포획 성능</span>을 입증했습니다.
+                        저희 팀은 잡힌 우렁이와 비지를 <span className="font-black text-slate-950 underline decoration-orange-300 underline-offset-8 italic">천연 아미노산 액비</span>로 환원하는 <span className="font-black text-slate-950 underline decoration-orange-300 underline-offset-8">완벽한 자원 순환 농법</span>을 제안합니다.
+                        지속 가능한 농업의 <span className="font-black text-slate-950">과학적인 근본</span>, 저희가 실천하겠습니다! 감사합니다!"
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="bg-slate-50 p-10 border-t border-slate-200 text-center text-2xl text-slate-500 font-black tracking-widest uppercase">
+              제72회 전국과학전람회 '근본' 팀 - Victory Project
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const root = createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+
+</html>
